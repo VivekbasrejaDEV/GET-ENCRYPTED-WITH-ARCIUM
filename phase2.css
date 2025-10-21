@@ -1,0 +1,395 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #000;
+    font-family: 'VT323', monospace;
+    color: #00ff41;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+}
+
+/* SCANLINES (Reused from Phase 1) */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 998;
+    animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+}
+
+/* CRT VIGNETTE */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+    pointer-events: none;
+    z-index: 997;
+}
+
+/* MAIN ENCRYPTION SCREEN */
+#encryption-screen {
+    position: relative;
+    z-index: 10;
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+}
+
+/* STATUS TEXT */
+#status-text {
+    font-size: 36px;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px #00ff41;
+    margin-bottom: 50px;
+    animation: statusFlicker 0.1s infinite alternate;
+}
+
+@keyframes statusFlicker {
+    0% { opacity: 0.95; }
+    100% { opacity: 1; }
+}
+
+/* PROGRESS BAR CONTAINER */
+#progress-container {
+    margin: 40px auto;
+    width: 100%;
+    max-width: 600px;
+}
+
+#progress-bar {
+    width: 100%;
+    height: 40px;
+    background: rgba(0, 255, 65, 0.1);
+    border: 2px solid #00ff41;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 65, 0.3),
+        inset 0 0 20px rgba(0, 255, 65, 0.1);
+}
+
+#progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: #00ff41;
+    box-shadow: 0 0 30px #00ff41;
+    transition: width 0.3s ease-out;
+    animation: progressGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes progressGlow {
+    0%, 100% { 
+        box-shadow: 0 0 30px #00ff41;
+    }
+    50% { 
+        box-shadow: 0 0 50px #00ff41, 0 0 80px #00ff41;
+    }
+}
+
+/* PROGRESS TEXT */
+#progress-text {
+    font-size: 28px;
+    margin-top: 15px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px #00ff41;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* GLITCHY PROGRESS BAR BLOCKS */
+.progress-glitch #progress-bar::before {
+    animation: progressGlitch 0.3s steps(4, end);
+}
+
+@keyframes progressGlitch {
+    0% { width: var(--progress); }
+    25% { width: calc(var(--progress) - 10%); }
+    50% { width: calc(var(--progress) + 15%); }
+    75% { width: calc(var(--progress) - 5%); }
+    100% { width: var(--progress); }
+}
+
+/* LOADING MESSAGES */
+#loading-messages {
+    margin-top: 40px;
+    min-height: 150px;
+    text-align: left;
+    font-size: 20px;
+    line-height: 1.8;
+    letter-spacing: 2px;
+}
+
+.loading-message {
+    opacity: 0;
+    animation: fadeInMessage 0.5s forwards;
+    margin-bottom: 8px;
+    text-shadow: 0 0 8px #00ff41;
+}
+
+@keyframes fadeInMessage {
+    from { 
+        opacity: 0; 
+        transform: translateX(-20px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0);
+    }
+}
+
+.loading-message.old {
+    opacity: 0.3;
+    color: #007722;
+}
+
+.loading-message.highlight {
+    color: #00ffff;
+    text-shadow: 0 0 15px #00ffff;
+    font-weight: bold;
+}
+
+.loading-message.error {
+    color: #ff0066;
+    text-shadow: 0 0 15px #ff0066;
+    animation: errorFlash 0.5s;
+}
+
+@keyframes errorFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* VERIFICATION PROMPT */
+#verification-prompt {
+    margin-top: 60px;
+    padding: 30px;
+    border: 3px solid #ff0066;
+    background: rgba(255, 0, 102, 0.05);
+    box-shadow: 
+        0 0 30px rgba(255, 0, 102, 0.4),
+        inset 0 0 30px rgba(255, 0, 102, 0.1);
+    animation: promptPulse 2s ease-in-out infinite;
+}
+
+@keyframes promptPulse {
+    0%, 100% { 
+        box-shadow: 0 0 30px rgba(255, 0, 102, 0.4), inset 0 0 30px rgba(255, 0, 102, 0.1);
+    }
+    50% { 
+        box-shadow: 0 0 50px rgba(255, 0, 102, 0.6), inset 0 0 50px rgba(255, 0, 102, 0.2);
+    }
+}
+
+.prompt-text {
+    font-size: 28px;
+    color: #ff0066;
+    text-shadow: 0 0 20px #ff0066;
+    margin-bottom: 20px;
+    letter-spacing: 3px;
+}
+
+.prompt-instruction {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #00ffff;
+}
+
+.prompt-phrase {
+    font-size: 32px;
+    color: #ffffff;
+    text-shadow: 0 0 25px #ffffff;
+    margin: 20px 0;
+    letter-spacing: 5px;
+}
+
+#verification-input {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #00ff41;
+    color: #00ff41;
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    padding: 15px;
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 65, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.8);
+    text-transform: uppercase;
+}
+
+#verification-input:focus {
+    box-shadow: 
+        0 0 40px rgba(0, 255, 65, 0.6),
+        inset 0 0 30px rgba(0, 0, 0, 0.9);
+    border-color: #00ffff;
+}
+
+#verification-input.error {
+    border-color: #ff0066;
+    color: #ff0066;
+    animation: inputShake 0.5s;
+}
+
+@keyframes inputShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+#verification-input.success {
+    border-color: #00ff41;
+    background: rgba(0, 255, 65, 0.1);
+    box-shadow: 
+        0 0 50px rgba(0, 255, 65, 0.8),
+        inset 0 0 30px rgba(0, 255, 65, 0.2);
+}
+
+.prompt-feedback {
+    margin-top: 15px;
+    font-size: 24px;
+    letter-spacing: 3px;
+}
+
+.prompt-feedback.error {
+    color: #ff0066;
+    text-shadow: 0 0 20px #ff0066;
+}
+
+.prompt-feedback.success {
+    color: #00ff41;
+    text-shadow: 0 0 20px #00ff41;
+}
+
+/* HIDDEN CLASS */
+.hidden {
+    display: none !important;
+}
+
+/* SCREEN GLITCH EFFECT */
+.screen-glitch {
+    animation: screenGlitch 0.4s;
+}
+
+@keyframes screenGlitch {
+    0%, 100% { 
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+    10% { 
+        transform: translate(-5px, 5px);
+        filter: hue-rotate(90deg);
+    }
+    20% { 
+        transform: translate(5px, -5px);
+        filter: hue-rotate(180deg);
+    }
+    30% { 
+        transform: translate(-5px, -5px);
+        filter: hue-rotate(270deg);
+    }
+    40% { 
+        transform: translate(5px, 5px);
+        filter: hue-rotate(360deg);
+    }
+    50% { 
+        transform: translate(0);
+    }
+}
+
+/* CHROMATIC ABERRATION */
+.chromatic-glitch {
+    position: relative;
+}
+
+.chromatic-glitch::before,
+.chromatic-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.chromatic-glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00ff;
+    animation: glitch-anim-1 0.3s infinite;
+}
+
+.chromatic-glitch::after {
+    left: -2px;
+    text-shadow: 2px 0 #00ffff;
+    animation: glitch-anim-2 0.3s infinite;
+}
+
+@keyframes glitch-anim-1 {
+    0%, 100% { transform: translate(0); }
+    33% { transform: translate(-2px, 2px); }
+    66% { transform: translate(2px, -2px); }
+}
+
+@keyframes glitch-anim-2 {
+    0%, 100% { transform: translate(0); }
+    33% { transform: translate(2px, -2px); }
+    66% { transform: translate(-2px, 2px); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    #status-text {
+        font-size: 24px;
+    }
+    
+    #loading-messages {
+        font-size: 16px;
+    }
+    
+    .prompt-text {
+        font-size: 20px;
+    }
+    
+    .prompt-phrase {
+        font-size: 24px;
+    }
+    
+    #verification-input {
+        font-size: 20px;
+    }
+}
